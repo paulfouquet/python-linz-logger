@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from functools import partial
 
 import structlog
 
@@ -66,4 +67,13 @@ def get_log():
     """
     get a instance of the JSON logger
     """
-    return structlog.get_logger()
+    log = structlog.get_logger()
+    log.trace = partial(trace, log)
+    return log
+
+
+def trace(self, event, **kw):
+    """
+    add trace level
+    """
+    return self._proxy_to_logger("trace", event, **kw)
