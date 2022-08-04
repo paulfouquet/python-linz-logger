@@ -4,6 +4,7 @@ from enum import Enum
 from functools import partial
 
 import structlog
+from structlog.contextvars import bind_contextvars, clear_contextvars, merge_contextvars, unbind_contextvars
 from structlog.exceptions import DropEvent
 
 
@@ -24,6 +25,7 @@ class LogLevel(Enum):
 
 
 current_level = LogLevel.debug
+clear_contextvars()
 
 
 def set_level(level: LogLevel):
@@ -33,6 +35,24 @@ def set_level(level: LogLevel):
     """
     global current_level
     current_level = level
+
+
+def set_contextvars(key_value: dict):
+    """Set the context variables.
+
+    Args:
+        key_value (dict): A dictionnary of key-value pairs.
+    """
+    bind_contextvars(**key_value)
+
+
+def remove_contextvars(keys):
+    """Remove the context variables.
+
+    Args:
+        keys (list): A list of keys.
+    """
+    unbind_contextvars(*keys)
 
 
 def level_filter(_, __, event_dict: dict):
@@ -76,13 +96,13 @@ def add_default_keys(current_logger, method_name: str, event_dict: dict):
 
 structlog.configure(
     processors=[
+        merge_contextvars,
         add_default_keys,
         level_filter,
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
         structlog.processors.JSONRenderer(),
-    ],
-    context_class=structlog.threadlocal.wrap_dict(dict),
+    ]
 )
 
 
