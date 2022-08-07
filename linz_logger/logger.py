@@ -2,10 +2,12 @@ import os
 import time
 from enum import Enum
 from functools import partial
+from platform import node
 
 import structlog
 from structlog.contextvars import bind_contextvars, clear_contextvars, merge_contextvars, unbind_contextvars
 from structlog.exceptions import DropEvent
+from ulid import ULID
 
 
 class LogLevel(Enum):
@@ -25,6 +27,10 @@ class LogLevel(Enum):
 
 
 current_level = LogLevel.debug
+structlog.PrintLogger.trace = structlog.PrintLogger.msg
+pid = os.getpid()
+hostname = node()
+ulid = str(ULID())
 clear_contextvars()
 
 
@@ -64,8 +70,6 @@ def level_filter(_, __, event_dict: dict):
     return event_dict
 
 
-structlog.PrintLogger.trace = structlog.PrintLogger.msg
-pid = os.getpid()
 # This is a standard format for the function so it needs all three arguments
 # Even thought we do not use them
 # pylint: disable=unused-argument
@@ -88,6 +92,8 @@ def add_default_keys(current_logger, method_name: str, event_dict: dict):
     # Standard keys that need to be added
     event_dict["v"] = 1
     event_dict["pid"] = pid
+    event_dict["hostname"] = hostname
+    event_dict["id"] = ulid
     # Remap event -> msg
     event_dict["msg"] = event_dict["event"]
     del event_dict["event"]

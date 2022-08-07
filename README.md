@@ -35,7 +35,7 @@ from os import environ
 from linz_logger import get_log, set_level, LogLevel
 
 set_level(LogLevel[environ.get("LOGLEVEL", "WARNING").lower()].value)
-set_contextvars({"hostname": environ.get("HOSTNAME")}) # remove_contextvars(["hostname"]) to remove a key
+set_contextvars({"country": "NZ"}) # remove_contextvars(["country"]) to remove a key
 get_log().error('Hello World', key="value")
-# {"key": "value", "level": 50, "time": 1601555605017, "v": 1, "pid": 311800, "msg": "Hello World", "hostname": "Ubuntu1"}
+# {"key": "value", "level": 50, "time": 1601555605017, "v": 1, "pid": 311800, "id": "01G9XAA1MCMX2K9NZN9GJJHN71", "msg": "Hello World", "hostname": "Ubuntu1", "country": "NZ"}
 ```
